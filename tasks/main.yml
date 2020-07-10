@@ -83,7 +83,7 @@
   - name: Set CDROM to "{{ iso }}" and PowerON server {{ domain }}
     command: |
       pwsh {{ powercli_script_dir }}/CDDrive.ps1 -server {{ vcenter }} -user {{ username }} \
-      -passwd {{ password }} -vm {{ domain }} -iso "[{{ datastore }}] {{ datastore_iso_dir}}/{{ iso }}"
+      -passwd {{ password }} -vm {{ domain }} -iso "[{{ datastore }}] {{ datastore_iso_dir }}/{{ iso }}"
     when: not domain_lock.stat.exists
   - name: Locked existing domain "{{ powercli_script_dir }}/{{ domain }}.lock"
     file:
