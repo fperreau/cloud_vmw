@@ -10,4 +10,3 @@
   gather_facts: no
   roles:
     - cloud_vmw
-
