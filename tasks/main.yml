@@ -1,0 +1,157 @@
+---
+##
+# VMW_CLOUD ROLE
+#
+# Author: F.PERREAU
+##
+
+## POWERCLI HOST
+- block:
+
+  ## DOWNLOAD VSPHERE CLOUDINIT TEMPLATE
+
+  ## CREATE CLOUDINIT CIDATA
+  - name: Create local CloudInit directory for CIDATA file server "{{ domain }}"
+    file:
+      path: "{{ powercli_cloud_dir }}/{{ domain }}"
+      state: directory
+  - name: Create local CloudInit CIDATA files
+    template:
+      src: "{{ cloud_os }}/{{ item }}"
+      dest: "{{ powercli_cloud_dir }}/{{ domain }}/{{ item }}"
+    with_items: "{{ cidata }}"
+    register: result_cidata
+  - name: Create CloudInit CIDATA iso "{{ domain }}.iso"
+    shell: genisoimage -output {{ domain }}.iso -volid cidata -joliet -r {{ domain }}
+    args:
+      chdir: "{{ powercli_cloud_dir }}"
+    when: result_cidata.changed
+
+  ## COPY CLOUDINIT CIDATA IN DATASTORE
+  - name: Copy CloudInit CIDATA in datastore
+    vsphere_copy:
+      datacenter: "{{ datacenter }}"
+      datastore: "{{ datastore }}"
+      hostname: "{{ vcenter }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      validate_certs: "{{ validate_certs }}"
+      src: "{{ powercli_cloud_dir }}/{{ domain }}.iso"
+      path: "{{ datastore_cloud_dir }}/{{ domain }}.iso"
+    when: result_cidata.changed
+
+  ## COPY SCRIPT FILES TO POWERCLI SERVER
+  - name: Copy script files to PowerCLI server in "{{ powercli_script_dir }}" 
+    copy:
+      src: "{{ item }}"
+      dest: "{{ powercli_script_dir }}"
+      mode: '0550'
+    with_items: "{{ POWERCLI_SCRIPT }}"
+
+  ## Clone CloudInit vSphere template
+  - name: Checking domain locked "{{ powercli_script_dir }}/{{ domain }}.lock"
+    stat:
+      path: "{{ powercli_script_dir }}/{{ domain }}.lock"
+    register: domain_lock 
+  - name: Create cloud-init server "{{ domain }}"
+    vmware_guest:
+      hostname: "{{ vcenter }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      datacenter: "{{ datacenter }}"
+      esxi_hostname: "{{ esxhost }}"
+      validate_certs: "{{ validate_certs }}"
+      folder: "{{ folder }}"
+      name: "{{ domain }}"
+      state: poweredoff
+      template: "{{ template }}"
+      guest_id: "{{ guest_id }}"
+      disk:
+      - size_gb: "{{ sys }}"
+        datastore: "{{ datastore }}"
+      hardware:
+        num_cpus: "{{ cpu }}"
+        memory_mb: "{{ ram|int *1024 }}"
+    when: not domain_lock.stat.exists
+
+  ## CloudInit server with CIDATA and restart with OS ISO
+  - name: Set CDROM to "[{{ datastore }}] cloudinit/{{ domain }}.iso" and PowerON server {{ domain }}
+    command: |
+      pwsh {{ powercli_script_dir }}/CDDrive.ps1 -server {{ vcenter }} -user {{ username }} \
+      -passwd {{ password }} -vm {{ domain }} -iso "[{{ datastore }}] {{ datastore_cloud_dir }}/{{ domain }}.iso"
+    when: not domain_lock.stat.exists
+  - name: Set CDROM to "{{ iso }}" and PowerON server {{ domain }}
+    command: |
+      pwsh {{ powercli_script_dir }}/CDDrive.ps1 -server {{ vcenter }} -user {{ username }} \
+      -passwd {{ password }} -vm {{ domain }} -iso "[{{ datastore }}] {{ datastore_iso_dir}}/{{ iso }}"
+    when: not domain_lock.stat.exists
+  - name: Locked existing domain "{{ powercli_script_dir }}/{{ domain }}.lock"
+    file:
+      path: "{{ powercli_script_dir }}/{{ domain }}.lock"
+      state: touch
+    when: not domain_lock.stat.exists
+
+  delegate_to: "{{ powercli_hostname }}"
+  become: "{{ powercli_username }}"
+
+## WAITING VMWARE VM STARTED
+- name: Wait for connection
+  wait_for_connection:
+    timeout: "{{ timeout_connection }}"
+
+## @CLASS - DEBIAN, REDHAT
+- block:
+  ## WHEN LVM THEN RESIZE LOGICAL VOLUME
+  - name: Resize LVM volumes
+    lvol:
+      vg: "{{ item.vg }}"
+      lv: "{{ item.lv }}"
+      size: "{{ item.size }}"
+      resizefs: "{{ item.resizefs }}"
+    with_items: "{{ resize_lvol }}"
+    when: resize_lvol is defined
+
+  ## UPDATE /ETC/HOSTS
+  - name: Update ETC_HOST
+    lineinfile:
+      dest: /etc/hosts
+      line: "{{ address }} {{ fqdn }} {{ hostname }}"
+  
+  ## MOUNT /MEDIA/CDROM
+  - name: Create /media/cdrom
+    file:
+      path: /media/cdrom
+      state: directory
+      mode: '0555'
+  - name: Mount CDROM
+    mount:
+      path: /media/cdrom
+      src: /dev/cdrom
+      fstype: iso9660
+      opts: ro
+      state: mounted
+
+  when: class_os != 'WINDOWS'
+
+## @CLASS - REDHAT
+- block:
+#  - name: Add YUM repository
+#    template:
+#      src: "{{ cloud_os }}.repo"
+#      dest: "/etc/yum.repos.d/{{ cloud_os }}.repo"
+  - name: Install MINIMAL packages
+    dnf:
+      name: "{{ PACKAGES_REDHAT }}"
+      state: present
+  - name: Start FIREWALLD
+    service:
+      name: firewalld
+      state: started
+  when: class_os == 'REDHAT'
+
+## CLASS - DEBIAN, REDHAT
+- name: Install default packages 
+  package:
+    name: "{{ PACKAGES }}"
+    state: present
+  when: class_os != 'WINDOWS'

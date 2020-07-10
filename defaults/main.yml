@@ -1,0 +1,108 @@
+---
+##
+# VMW_CLOUD role
+#
+# Author: F.PERREAU
+##
+
+## POWERCLI SERVER PARAMETER
+powercli_hostname: localhost
+powercli_username: perreau
+powercli_cloud_dir: files/cloudinit     # powercli cloudinit ist source
+powercli_iso_dir: /mnt/depot/iso        # powercli iso source
+powercli_script_dir: files              # powercli scripts and lock files
+datastore_cloud_dir: cloudinit          # datastore cloudinit iso destination
+datastore_iso_dir: depot                # datastore iso destination
+
+## VMWARE VSPHERE INFRASTRUCTURE
+username: administrator@vsphere.local
+password: secret
+vcenter: 192.168.1.97
+esxhost: 192.168.1.98
+datacenter: FPX
+datastore: DS01
+folder: vm
+validate_certs: false
+timeout_connection: 60
+
+## TARGET OS - ubuntu, rhel, centos
+cloud_os: rhel    # debian, ubuntu, rhel, fedora, centos
+class_os: "{{ CLOUDINIT[cloud_os].class }}"
+
+ssh_pub_keys:
+- "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCvgICXd1YnPvg6Wr1h9i3YWVWnA+HITFfjZveZz7LPOZh+u2W2+LR3V5krV42cWvByqcBp3ZtaUu0Xiq6g3CktDmrGdh7xfw0BVWehNAnLg+YRtJIFut4N0geGqY5aE0u/lXn40J+819G8rkjFGd/RQYfH7Vx7hi28AeNIUj2djbaD4gH2lo0eU1+eDZxoEy4pZQMkgfd8/qWBvyg7H3OCGdNilmi+y0Edd6K9jzGQmslGE1pli6251l9frDUG61Jsi/1I6zNQyfVR1j9GBDRoWUHnHc0EuSjMErRsrnO9bOlE4dzipK+o5+CWKbmPhUbaulovR35vaDEsa5feqYiR perreau@ibmlx"
+
+## TARGET
+hostname: "{{ inventory_hostname }}"
+fqdn: "{{ hostname }}.fpu.local"
+
+domain: "{{ inventory_hostname }}"
+cpu: "{{ VM[domain].CPU }}"
+ram: "{{ VM[domain].RAM }}"
+sys: "{{ VM[domain].SYS }}"
+dat: "{{ VM[domain].DAT }}"
+
+## HOST - ip_address / prefix
+host: "{{ VM[domain].IP }}"
+address: "{{ host|ipaddr('address') }}"
+netmask: "{{ host|ipaddr('netmask') }}"
+network: "{{ host|ipaddr('network') }}"
+broadcast: "{{ host|ipaddr('broadcast') }}"
+gateway: "{{ VM[domain].GW }}"
+
+## ESXI - provisioning CIDATA / OVA / ISO
+cidata: "{{ CLOUDINIT[cloud_os].cidata }}"
+template: "{{ CLOUDINIT[cloud_os].template }}"
+guest_id: "{{ CLOUDINIT[cloud_os].guest_id }}"
+iso: "{{ CLOUDINIT[cloud_os].iso }}"
+ova: "{{ CLOUDINIT[cloud_os].ova }}"
+
+## WHEN LVM THEN RESIZE LOGICAL VOLUMES
+# resize_lvol: [{ vg: "rhel", lv: "root", size: "+70%FREE", resizefs: true }]
+
+## PREREQUISIT
+POWERCLI_SCRIPT:
+  - CDDrive.ps1
+
+PACKAGES_REDHAT:
+  - "@Minimal Install"
+  - "https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm"
+
+PACKAGES:
+  - open-vm-tools
+  - qemu-guest-agent
+  - byobu
+  - htop 
+  - nload
+  - multitail
+  - tree
+
+## CLOUDINIT IMAGES
+CLOUDINIT:
+  debian:
+    class: DEBIAN
+    cidata: [ meta-data, user-data ]
+    template: ""
+    iso: DEBIAN/debian-10.4.0-amd64-netinst.iso
+    ova: ""
+  ubuntu:
+    class: DEBIAN
+    cidata: [ meta-data, user-data ]
+    template: ""
+    iso: UBUNTU/ubuntu-20.04-live-server-amd64.iso
+    ova: ""
+  centos:
+    class: REDHAT
+    cidata: [ meta-data, user-data ]
+    template: ""
+    iso: CENTOS/CentOS-8.1.1911-x86_64-dvd1.iso
+    ova: ""    
+  rhel:
+    class: REDHAT
+    cidata: [ meta-data, user-data ]
+    template: rhel82
+    guest_id: rhel8_64Guest
+    iso: REDHAT/rhel-8.2-x86_64-dvd.iso
+    ova: /mnt/depot/iso/CLOUD/rhel82.ova
+  windows:
+    class: WINDOWS

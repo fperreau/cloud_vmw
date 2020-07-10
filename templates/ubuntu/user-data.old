@@ -1,0 +1,21 @@
+#cloud-config
+
+users:
+  - default
+  - name: ubuntu
+    lock-passwd: False
+    plain_text_passwd: ubuntu
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    groups: sudo
+    shell: /bin/bash
+    ssh-authorized-keys:
+    {% for key in ssh_pub_keys %}
+      - {{ key }}
+    {% endfor %}
+
+runcmd:
+  - echo "AllowUsers ubuntu" >> /etc/ssh/sshd_config
+  - restart ssh
+  - localectl set-keymap fr
+  - touch /etc/cloud/cloud-init.disabled
+  - systemctl mask cloud-init-local cloud-init cloud-config cloud-final

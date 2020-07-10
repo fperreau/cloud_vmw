@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Include vmw_cloud"
+      include_role:
+        name: "vmw_cloud"

@@ -1,0 +1,57 @@
+#cloud-config
+chpasswd: { expire: False }
+password: Passw0rd!
+timezone: Europe/Paris
+
+# Hostname management
+preserve_hostname: False
+hostname: {{ hostname }}
+fqdn: {{ fqdn }}
+
+# Configure where output will go
+output:
+  all: ">> /var/log/cloud-init.log"
+    
+# configure interaction with ssh server
+ssh_svcname: ssh
+ssh_deletekeys: True
+ssh_genkeytypes: ['rsa', 'ecdsa']
+
+# Install my public ssh key to the first user-defined user configured
+# in cloud.cfg in the template
+ssh_authorized_keys:
+{% for key in ssh_pub_keys %}
+  - {{ key }}
+{% endfor %}
+
+growpart:
+  mode: auto
+  devices:
+  - "/dev/sda3"
+  ignore_growroot_disabled: false
+
+yum_repos:
+  BaseOS:
+    name: Red Hat Enterprise Linux 8 - BaseOS
+    baseurl: file:///media/cdrom/BaseOS/
+    enabled: true
+    gpgcheck: true
+    gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+  AppStream:
+    name: Red Hat Enterprise Linux 8 - AppStream
+    baseurl: file:///media/cdrom/AppStream/
+    enabled: true
+    gpgcheck: true
+    gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+
+runcmd:
+  - localectl set-keymap fr
+  - pvresize /dev/sda3
+  - touch /etc/cloud/cloud-init.disabled
+  
+power_state:
+  delay: now
+  mode: poweroff
+  message: "shutdown after cloud init executed !"
+
+final_message: "The system is finall up, after $UPTIME seconds"

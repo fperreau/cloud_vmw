@@ -1,0 +1,16 @@
+---
+version: 1
+config:
+- name: enp1s0
+  subnets:
+  - type: static
+    address: {{ address }}
+    netmask: {{ netmask }}
+    routes:
+    - network: 0.0.0.0
+      netmask: 0.0.0.0
+      gateway: {{ gateway }}
+- type: nameserver
+  address: [{{ gateway }}, 8.8.8.8, 8.8.4.4]
+  search: [fpu.local]
+ 

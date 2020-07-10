@@ -1,0 +1,32 @@
+#cloud-config
+chpasswd: { expire: False }
+password: Passw0rd
+timezone: Europe/Paris
+
+# Hostname management
+preserve_hostname: False
+hostname: {{ hostname }}
+fqdn: {{ fqdn }}
+
+# Configure where output will go
+output:
+  all: ">> /var/log/cloud-init.log"
+    
+# configure interaction with ssh server
+ssh_svcname: ssh
+ssh_deletekeys: True
+ssh_genkeytypes: ['rsa', 'ecdsa']
+
+# Install my public ssh key to the first user-defined user configured
+# in cloud.cfg in the template (which is centos for CentOS cloud images)
+ssh_authorized_keys:
+{% for key in ssh_pub_keys %}
+  - {{ key }}
+{% endfor %}
+
+runcmd:
+  - localectl set-keymap fr
+  - touch /etc/cloud/cloud-init.disabled
+  - systemctl mask cloud-init-local cloud-init cloud-config cloud-final
+#  - yum -y remove cloud-init
+

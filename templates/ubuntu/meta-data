@@ -1,0 +1,13 @@
+dsmode: local
+instance-id: {{ domain }}
+local-hostname: {{ fqdn }}
+network-interfaces: |
+  auto enp1s0
+  iface enp1s0 inet static
+    address {{ address }}
+    network {{ network }}
+    netmask {{ netmask }}
+    broadcast {{ broadcast }}
+    gateway {{ gateway }}
+    dns-nameservers {{ gateway }}
+    dns-search fpu.local

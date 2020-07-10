@@ -1,0 +1,61 @@
+#cloud-config
+hostname: {{ hostname }}
+fqdn: {{ fqdn }}
+
+manage_etc_hosts: False
+ssh_pwauth: True
+disable_root: False
+#disable_root_opts:
+chpasswd:
+  list: |
+     ops:Passw0rd
+     root:Passw0rd
+  expire: False
+
+package_update: True
+package_upgrade: True
+packages:
+  - qemu-guest-agent
+  - open-vm-tools
+  - net-tools
+  - byobu
+  - nload
+  - multitail
+  - tree
+
+users:
+  - default
+  - name: ops
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: users, admin
+    home: /home/ops
+    shell: /bin/bash
+    lock_passwd: False
+    ssh-authorized-keys:
+    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCvgICXd1YnPvg6Wr1h9i3YWVWnA+HITFfjZveZz7LPOZh+u2W2+LR3V5krV42cWvByqcBp3ZtaUu0Xiq6g3CktDmrGdh7xfw0BVWehNAnLg+YRtJIFut4N0geGqY5aE0u/lXn40J+819G8rkjFGd/RQYfH7Vx7hi28AeNIUj2djbaD4gH2lo0eU1+eDZxoEy4pZQMkgfd8/qWBvyg7H3OCGdNilmi+y0Edd6K9jzGQmslGE1pli6251l9frDUG61Jsi/1I6zNQyfVR1j9GBDRoWUHnHc0EuSjMErRsrnO9bOlE4dzipK+o5+CWKbmPhUbaulovR35vaDEsa5feqYiR perreau@ibmlx
+  - name: root
+    lock_passwd: False
+    ssh-authorized-keys:
+    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCvgICXd1YnPvg6Wr1h9i3YWVWnA+HITFfjZveZz7LPOZh+u2W2+LR3V5krV42cWvByqcBp3ZtaUu0Xiq6g3CktDmrGdh7xfw0BVWehNAnLg+YRtJIFut4N0geGqY5aE0u/lXn40J+819G8rkjFGd/RQYfH7Vx7hi28AeNIUj2djbaD4gH2lo0eU1+eDZxoEy4pZQMkgfd8/qWBvyg7H3OCGdNilmi+y0Edd6K9jzGQmslGE1pli6251l9frDUG61Jsi/1I6zNQyfVR1j9GBDRoWUHnHc0EuSjMErRsrnO9bOlE4dzipK+o5+CWKbmPhUbaulovR35vaDEsa5feqYiR perreau@ibmlx
+
+# every boot
+bootcmd:
+  - [ sh, -c, "sgdisk -e -d3 -n3:0:0 -t3:8e00 /dev/vda" ]
+  - [ sh, -c, partprobe ]
+  - [ sh, -c, "pvresize /dev/vda3" ]
+
+# run once for setup
+runcmd:
+  - echo "AllowUsers root ops" >> /etc/ssh/sshd_config
+  - restart ssh
+  - localectl set-keymap fr
+  - touch /etc/cloud/cloud-init.disabled
+#  - systemctl mask cloud-init-local cloud-init cloud-config cloud-final  
+#  - [ sh, -c, 'update-grub' ]
+
+# reboot so grub config takes affect
+#power_state:
+#  mode: reboot
+
+# written to /var/log/cloud-init-output.log
+final_message: "FRED: The system is finall up, after $UPTIME seconds"
