@@ -8,8 +8,8 @@ disable_root: False
 #disable_root_opts:
 chpasswd:
   list: |
-     ops:Passw0rd
-     root:Passw0rd
+     ops:Passw0rd!
+     root:Passw0rd!
   expire: False
 
 package_update: True
