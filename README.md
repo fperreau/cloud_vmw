@@ -1,38 +1,70 @@
-Role Name
-=========
+Role cloud_kvm
+==============
 
-A brief description of the role goes here.
+Cloud KVM role help you to deploy a CloudInit image domain in Linux KVM.
+
+version: 0.1.0
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+Minimum Ansible 2.8, VMware vSphere ESXi + vCenter, PowerCLI + Powershell 
+
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+Those variables define class, cidata, image and iso file used to deploy domain for each Linux target.
 
-Dependencies
-------------
+**TARGET OS - ubuntu, rhel, centos**
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+    # debian, ubuntu, rhel, fedora, centos
+    cloud_os: rhel
+    class_os: "{{ CLOUDINIT[cloud_os].class }}"
+
+**Cloud-Init images default dict**
+
+    CLOUDINIT:
+      debian:
+        class: DEBIAN
+        cidata: [ meta-data, user-data ]
+        template: ""
+        iso: DEBIAN/debian-10.4.0-amd64-netinst.iso
+        ova: ""
+      ubuntu:
+        class: DEBIAN
+        cidata: [ meta-data, user-data ]
+        template: ""
+        iso: UBUNTU/ubuntu-20.04-live-server-amd64.iso
+        ova: ""
+      centos:
+        class: REDHAT
+        cidata: [ meta-data, user-data ]
+        template: ""
+        iso: CENTOS/CentOS-8.1.1911-x86_64-dvd1.iso
+        ova: ""    
+      rhel:
+        class: REDHAT
+        cidata: [ meta-data, user-data ]
+        template: rhel82
+        guest_id: rhel8_64Guest
+        iso: REDHAT/rhel-8.2-x86_64-dvd.iso
+        ova: /mnt/depot/iso/CLOUD/rhel82.ova
+      windows:
+        class: WINDOWS
+
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: servers
+    - name: CloudInit domain example
+      hosts: all
+      gather_facts: no
       roles:
-         - { role: username.rolename, x: 42 }
+        - cloud_vmw
 
 License
 -------
 
-BSD
+Apache 2.0
 
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).

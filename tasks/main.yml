@@ -1,6 +1,6 @@
 ---
 ##
-# VMW_CLOUD ROLE
+# CLOUD_VMW ROLE
 #
 # Author: F.PERREAU
 ##
@@ -22,7 +22,7 @@
     with_items: "{{ cidata }}"
     register: result_cidata
   - name: Create CloudInit CIDATA iso "{{ domain }}.iso"
-    shell: genisoimage -output {{ domain }}.iso -volid cidata -joliet -r {{ domain }}
+    command: genisoimage -output {{ domain }}.iso -volid cidata -joliet -r {{ domain }}
     args:
       chdir: "{{ powercli_cloud_dir }}"
     when: result_cidata.changed
@@ -116,7 +116,7 @@
     lineinfile:
       dest: /etc/hosts
       line: "{{ address }} {{ fqdn }} {{ hostname }}"
-  
+
   ## MOUNT /MEDIA/CDROM
   - name: Create /media/cdrom
     file:

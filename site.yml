@@ -1,0 +1,13 @@
+---
+##
+# CLOUD_VMW SITE
+#
+# Author: F.PERREAU
+##
+
+- name: CloudInit VMware VM template example
+  hosts: all
+  gather_facts: no
+  roles:
+    - cloud_vmw
+
