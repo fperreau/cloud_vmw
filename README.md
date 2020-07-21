@@ -8,7 +8,7 @@ version: 0.1.0
 Requirements
 ------------
 
-Minimum Ansible 2.8, VMware vSphere ESXi + vCenter, PowerCLI + Powershell 
+Minimum Ansible 2.8, VMware vSphere ESXi + vCenter, PowerCLI + Powershell
 
 
 Role Variables
@@ -42,7 +42,7 @@ Those variables define class, cidata, image and iso file used to deploy domain f
         cidata: [ meta-data, user-data ]
         template: ""
         iso: CENTOS/CentOS-8.1.1911-x86_64-dvd1.iso
-        ova: ""    
+        ova: ""
       rhel:
         class: REDHAT
         cidata: [ meta-data, user-data ]

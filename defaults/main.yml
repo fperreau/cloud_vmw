@@ -72,7 +72,7 @@ PACKAGES:
   - open-vm-tools
   - qemu-guest-agent
   - byobu
-  - htop 
+  - htop
   - nload
   - multitail
   - tree
@@ -96,7 +96,7 @@ CLOUDINIT:
     cidata: [ meta-data, user-data ]
     template: ""
     iso: CENTOS/CentOS-8.1.1911-x86_64-dvd1.iso
-    ova: ""    
+    ova: ""
   rhel:
     class: REDHAT
     cidata: [ meta-data, user-data ]

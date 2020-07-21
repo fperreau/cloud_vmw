@@ -47,7 +47,7 @@ def ChangeCDDrive(si, vm_obj, cdrom_number, full_path_to_iso=None):
     cdrom_spec.device.controllerKey = cdrom_device.controllerKey
     cdrom_spec.device.key = cdrom_device.key
     cdrom_spec.device.connectable = vim.vm.device.VirtualDevice.ConnectInfo()
-    
+
     # if full_path_to_iso is provided it will mount the iso
     if full_path_to_iso:
         cdrom_spec.device.backing = vim.vm.device.VirtualCdrom.IsoBackingInfo()
@@ -56,7 +56,7 @@ def ChangeCDDrive(si, vm_obj, cdrom_number, full_path_to_iso=None):
         cdrom_spec.device.connectable.startConnected = True
     else:
         cdrom_spec.device.backing = vim.vm.device.VirtualCdrom.RemotePassthroughBackingInfo()
-    
+
     # Allowing guest control
     cdrom_spec.device.connectable.allowGuestControl = True
 

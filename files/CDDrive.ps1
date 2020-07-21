@@ -1,6 +1,6 @@
 #!/bin/env /snap/bin/pwsh
 ##
-# CDDrive.ps1 -server vcenter -user administrator@vsphere.local -passwd secret -vm node1 -iso "[DS01] cloudinit/node1.iso" 
+# CDDrive.ps1 -server vcenter -user administrator@vsphere.local -passwd secret -vm node1 -iso "[DS01] cloudinit/node1.iso"
 ##
 
 param($server,$user,$passwd,$vm,$iso)

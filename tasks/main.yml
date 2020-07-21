@@ -41,7 +41,7 @@
     when: result_cidata.changed
 
   ## COPY SCRIPT FILES TO POWERCLI SERVER
-  - name: Copy script files to PowerCLI server in "{{ powercli_script_dir }}" 
+  - name: Copy script files to PowerCLI server in "{{ powercli_script_dir }}"
     copy:
       src: "{{ item }}"
       dest: "{{ powercli_script_dir }}"
@@ -52,7 +52,7 @@
   - name: Checking domain locked "{{ powercli_script_dir }}/{{ domain }}.lock"
     stat:
       path: "{{ powercli_script_dir }}/{{ domain }}.lock"
-    register: domain_lock 
+    register: domain_lock
   - name: Create cloud-init server "{{ domain }}"
     vmware_guest:
       hostname: "{{ vcenter }}"
@@ -150,7 +150,7 @@
   when: class_os == 'REDHAT'
 
 ## CLASS - DEBIAN, REDHAT
-- name: Install default packages 
+- name: Install default packages
   package:
     name: "{{ PACKAGES }}"
     state: present

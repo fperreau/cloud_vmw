@@ -13,4 +13,4 @@ config:
 - type: nameserver
   address: [{{ gateway }}, 8.8.8.8, 8.8.4.4]
   search: [fpu.local]
- 
+

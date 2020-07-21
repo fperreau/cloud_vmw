@@ -50,7 +50,7 @@ runcmd:
   - restart ssh
   - localectl set-keymap fr
   - touch /etc/cloud/cloud-init.disabled
-#  - systemctl mask cloud-init-local cloud-init cloud-config cloud-final  
+#  - systemctl mask cloud-init-local cloud-init cloud-config cloud-final
 #  - [ sh, -c, 'update-grub' ]
 
 # reboot so grub config takes affect
