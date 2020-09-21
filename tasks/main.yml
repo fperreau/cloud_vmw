@@ -8,8 +8,6 @@
 ## POWERCLI HOST
 - block:
 
-  ## DOWNLOAD VSPHERE CLOUDINIT TEMPLATE
-
   ## CREATE CLOUDINIT CIDATA
   - name: Create local CloudInit directory for CIDATA file server "{{ domain }}"
     file:
@@ -135,14 +133,15 @@
 
 ## @CLASS - REDHAT
 - block:
-#  - name: Add YUM repository
-#    template:
-#      src: "{{ cloud_os }}.repo"
-#      dest: "/etc/yum.repos.d/{{ cloud_os }}.repo"
   - name: Install MINIMAL packages
-    dnf:
+    package:
       name: "{{ PACKAGES_REDHAT }}"
       state: present
+  - name: Install EPEL packages
+    package:
+      name: "{{ PACKAGES_REDHAT }}"
+      state: present
+      disable_gpg_check: true
   - name: Start FIREWALLD
     service:
       name: firewalld

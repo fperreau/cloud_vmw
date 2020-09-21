@@ -17,9 +17,9 @@ datastore_iso_dir: depot                # datastore iso destination
 ## VMWARE VSPHERE INFRASTRUCTURE
 username: administrator@vsphere.local
 password: secret
-vcenter: 192.168.1.97
-esxhost: 192.168.1.98
-datacenter: FPX
+vcenter: 192.168.1.195
+esxhost: 192.168.1.196
+datacenter: LAB
 datastore: DS01
 folder: vm
 validate_certs: false
@@ -35,6 +35,7 @@ ssh_pub_keys:
 ## TARGET
 hostname: "{{ inventory_hostname }}"
 fqdn: "{{ hostname }}.fpu.local"
+lvm_dev: /dev/sda2
 
 domain: "{{ inventory_hostname }}"
 cpu: "{{ VM[domain].CPU }}"
@@ -66,7 +67,7 @@ POWERCLI_SCRIPT:
 
 PACKAGES_REDHAT:
   - "@Minimal Install"
-  - "https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm"
+#  - "https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm"
 
 PACKAGES:
   - open-vm-tools

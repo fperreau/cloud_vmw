@@ -27,7 +27,7 @@ ssh_authorized_keys:
 growpart:
   mode: auto
   devices:
-  - "/dev/sda3"
+  - "{{ lvm_dev }}"
   ignore_growroot_disabled: false
 
 yum_repos:
@@ -46,7 +46,7 @@ yum_repos:
 
 runcmd:
   - localectl set-keymap fr
-  - pvresize /dev/sda3
+  - pvresize "{{ lvm_dev }}"
   - touch /etc/cloud/cloud-init.disabled
 
 power_state:
